@@ -6,7 +6,6 @@ import {
   Plus_Jakarta_Sans,
   JetBrains_Mono,
 } from 'next/font/google'
-import { Auth0Provider } from '@auth0/auth0-react'
 import Header from '../components/header'
 import Footer from '../components/footer'
 import { PROFILE } from '../lib/profileData'
@@ -33,14 +32,10 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 })
 
-const auth0Domain = process.env.NEXT_PUBLIC_AUTH0_DOMAIN
-const auth0ClientId = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID
-const isAuth0Enabled = Boolean(auth0Domain && auth0ClientId)
-
 export default function MyApp({ Component, pageProps }) {
   const fontClasses = `${instrumentSerif.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable}`
 
-  const appContent = (
+  return (
     <div className={`app-shell ${fontClasses}`}>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -61,21 +56,4 @@ export default function MyApp({ Component, pageProps }) {
       <Footer />
     </div>
   )
-
-  if (isAuth0Enabled) {
-    return (
-      <Auth0Provider
-        domain={auth0Domain}
-        clientId={auth0ClientId}
-        authorizationParams={{
-          redirect_uri:
-            typeof window !== 'undefined' ? window.location.origin : undefined,
-        }}
-      >
-        {appContent}
-      </Auth0Provider>
-    )
-  }
-
-  return appContent
 }

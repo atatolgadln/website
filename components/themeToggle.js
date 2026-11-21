@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react'
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState('light')
-  const [mounted, setMounted] = useState(false)
+  const [theme, setTheme] = useState('dark')
 
   useEffect(() => {
-    const current = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
+    const current =
+      document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'
     setTheme(current)
-    setMounted(true)
   }, [])
 
   function toggleTheme() {
@@ -21,7 +20,7 @@ export default function ThemeToggle() {
     }
   }
 
-  const isDark = mounted && theme === 'dark'
+  const isDark = theme === 'dark'
   const label = isDark ? 'Switch to light mode' : 'Switch to dark mode'
 
   return (

@@ -1,7 +1,5 @@
-import { useState } from 'react'
 import Head from 'next/head'
 import Image from 'next/image'
-import Link from 'next/link'
 import Container from '../components/container'
 import {
   PROFILE,
@@ -10,24 +8,10 @@ import {
   SKILL_GROUPS,
   SOCIAL_LINKS,
 } from '../lib/profileData'
-import { getAllPosts } from '../lib/getPost'
-import { formatFullDate } from '../lib/dateRelative'
 
-const CATEGORIES = [
-  { id: 'filter-all', value: 'All', label: 'All' },
-  { id: 'filter-web', value: 'Web', label: 'Web' },
-  { id: 'filter-ml-python', value: 'ML & Python', label: 'ML & Python' },
-  { id: 'filter-mobile', value: 'Mobile', label: 'Mobile' },
-  { id: 'filter-bots-tools', value: 'Bots & Tools', label: 'Bots & Tools' },
-]
-
-export default function HomePage({ recentPosts = [] }) {
-  const [activeCategory, setActiveCategory] = useState('All')
-
-  const filteredProjects =
-    activeCategory === 'All'
-      ? PROJECTS
-      : PROJECTS.filter((project) => project.category === activeCategory)
+export default function HomePage() {
+  const curatedProjects = PROJECTS.slice(0, 4)
+  const curatedSkills = SKILL_GROUPS.slice(0, 3)
 
   const githubLink =
     SOCIAL_LINKS.find((link) => link.id === 'github')?.href ||
@@ -55,15 +39,14 @@ export default function HomePage({ recentPosts = [] }) {
               />
             </div>
 
-            <div>
-              <div className="hero-meta">
-                <span className="hero-meta__dot" aria-hidden="true" />
-                <span>Based in {PROFILE.location}</span>
+            <div className="hero-content">
+              <p className="hero-meta">
+                <span>{PROFILE.location}</span>
                 <span className="hero-meta__sep" aria-hidden="true">
-                  /
+                  ·
                 </span>
-                <span>Software Developer</span>
-              </div>
+                <span>@{PROFILE.githubUsername}</span>
+              </p>
 
               <h1 id="hero-heading" className="hero-title">
                 {PROFILE.name}
@@ -73,23 +56,19 @@ export default function HomePage({ recentPosts = [] }) {
               <p className="hero-bio">{PROFILE.bio}</p>
 
               <div className="hero-actions">
-                <a
-                  id="cta-projects"
-                  href="#projects"
-                  className="btn btn--primary"
-                >
-                  Explore Projects
+                <a id="cta-work" href="#work" className="btn btn--primary">
+                  Selected Work
                 </a>
-                <Link
-                  id="cta-writing"
-                  href="/posts"
+                <a
+                  id="cta-contact"
+                  href="#contact"
                   className="btn btn--secondary"
                 >
-                  Read Writing
-                </Link>
+                  Get in Touch
+                </a>
               </div>
 
-              <div className="hero-socials" aria-label="Profiles">
+              <div className="hero-socials" aria-label="Social profiles">
                 {SOCIAL_LINKS.map((item) => {
                   const isExternal = item.href.startsWith('http')
                   return (
@@ -113,53 +92,30 @@ export default function HomePage({ recentPosts = [] }) {
         </Container>
       </section>
 
-      {/* Selected Projects */}
-      <section
-        id="projects"
-        className="section"
-        aria-labelledby="projects-heading"
-      >
+      {/* Selected Work */}
+      <section id="work" className="section" aria-labelledby="work-heading">
         <Container>
           <div className="section-header">
             <div>
-              <span className="section-eyebrow">Selected Work</span>
-              <h2 id="projects-heading" className="section-title">
-                Projects
+              <span className="section-eyebrow">01 · Portfolio</span>
+              <h2 id="work-heading" className="section-title">
+                Selected Work
               </h2>
             </div>
-
-            <div
-              className="filter-tabs"
-              role="group"
-              aria-label="Filter projects by category"
-            >
-              {CATEGORIES.map((category) => {
-                const isActive = activeCategory === category.value
-                return (
-                  <button
-                    key={category.value}
-                    id={category.id}
-                    type="button"
-                    className={`filter-tab${isActive ? ' filter-tab--active' : ''}`}
-                    onClick={() => setActiveCategory(category.value)}
-                    aria-pressed={isActive}
-                  >
-                    {category.label}
-                  </button>
-                )
-              })}
-            </div>
+            <span className="section-count" aria-hidden="true">
+              0{curatedProjects.length} Projects
+            </span>
           </div>
 
           <div className="projects-grid">
-            {filteredProjects.map((project) => (
+            {curatedProjects.map((project) => (
               <article key={project.id} className="project-card">
-                <div>
+                <div className="project-card__body">
                   <div className="project-card__top">
-                    <span className="project-card__category">
-                      {project.category}
+                    <span className="project-card__tag">
+                      {project.tag || project.category}
                     </span>
-                    <span>{project.year}</span>
+                    <span className="project-card__year">{project.year}</span>
                   </div>
 
                   <h3 className="project-card__title">{project.title}</h3>
@@ -169,7 +125,7 @@ export default function HomePage({ recentPosts = [] }) {
                 <div className="project-card__footer">
                   <ul className="tech-list" aria-label="Technologies used">
                     {project.tech.map((item) => (
-                      <li key={item} className="tech-tag">
+                      <li key={item} className="tech-pill">
                         {item}
                       </li>
                     ))}
@@ -183,17 +139,19 @@ export default function HomePage({ recentPosts = [] }) {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        GitHub ↗
+                        GitHub
+                        <span aria-hidden="true">↗</span>
                       </a>
                     ) : null}
                     {project.liveUrl ? (
                       <a
                         href={project.liveUrl}
-                        className="project-link project-link--primary"
+                        className="project-link project-link--accent"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        Live ↗
+                        Live
+                        <span aria-hidden="true">↗</span>
                       </a>
                     ) : null}
                   </div>
@@ -204,15 +162,21 @@ export default function HomePage({ recentPosts = [] }) {
         </Container>
       </section>
 
-      {/* Journey & Skills */}
-      <section className="section" aria-labelledby="journey-heading">
+      {/* About — Journey & Stack */}
+      <section id="about" className="section" aria-labelledby="about-heading">
         <Container>
-          <div className="journey-grid">
+          <div className="section-header">
             <div>
-              <span className="section-eyebrow">Timeline</span>
-              <h2 id="journey-heading" className="subsection-title">
-                Journey
+              <span className="section-eyebrow">02 · Background</span>
+              <h2 id="about-heading" className="section-title">
+                Journey &amp; Stack
               </h2>
+            </div>
+          </div>
+
+          <div className="about-grid">
+            <div className="about-column">
+              <h3 className="about-column__label">Timeline</h3>
 
               <ol className="timeline">
                 {EXPERIENCE.map((item) => (
@@ -222,7 +186,7 @@ export default function HomePage({ recentPosts = [] }) {
                   >
                     <span className="timeline__marker" aria-hidden="true" />
                     <span className="timeline__period">{item.period}</span>
-                    <h3 className="timeline__heading">{item.title}</h3>
+                    <h4 className="timeline__title">{item.title}</h4>
                     <span className="timeline__role">{item.role}</span>
                     <p className="timeline__desc">{item.description}</p>
                   </li>
@@ -230,14 +194,13 @@ export default function HomePage({ recentPosts = [] }) {
               </ol>
             </div>
 
-            <div>
-              <span className="section-eyebrow">Capabilities</span>
-              <h2 className="subsection-title">Tools & Stack</h2>
+            <div className="about-column">
+              <h3 className="about-column__label">Core Stack</h3>
 
               <div className="skills-list">
-                {SKILL_GROUPS.map((group) => (
+                {curatedSkills.map((group) => (
                   <div key={group.label} className="skill-group">
-                    <h3 className="skill-group__label">{group.label}</h3>
+                    <h4 className="skill-group__label">{group.label}</h4>
                     <ul className="skill-group__items">
                       {group.items.map((skill) => (
                         <li key={skill} className="skill-pill">
@@ -253,79 +216,28 @@ export default function HomePage({ recentPosts = [] }) {
         </Container>
       </section>
 
-      {/* Recent Writing */}
-      <section className="section" aria-labelledby="writing-heading">
+      {/* Contact */}
+      <section id="contact" className="section" aria-labelledby="contact-heading">
         <Container>
-          <div className="section-header">
-            <div>
-              <span className="section-eyebrow">Notebook</span>
-              <h2 id="writing-heading" className="section-title">
-                Recent Writing
-              </h2>
-            </div>
-
-            <Link href="/posts" className="section-link">
-              View all posts
-              <span className="section-link__arrow" aria-hidden="true">
-                →
-              </span>
-            </Link>
-          </div>
-
-          {recentPosts.length ? (
-            <div className="posts-list">
-              {recentPosts.map((post) => (
-                <article key={post.slug} className="post-row">
-                  <Link href={`/posts/${post.slug}`} className="post-row__link">
-                    <div className="post-row__meta">
-                      <time dateTime={post.date}>
-                        {formatFullDate(post.date)}
-                      </time>
-                      {post.readingTime ? (
-                        <span className="post-row__reading">
-                          {post.readingTime}
-                        </span>
-                      ) : null}
-                    </div>
-
-                    <div>
-                      <h3 className="post-row__title">{post.title}</h3>
-                      {post.excerpt ? (
-                        <p className="post-row__excerpt">{post.excerpt}</p>
-                      ) : null}
-                    </div>
-                  </Link>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <p className="empty-state">No posts published yet.</p>
-          )}
-        </Container>
-      </section>
-
-      {/* Contact Banner */}
-      <section className="section" aria-labelledby="contact-heading">
-        <Container>
-          <div className="contact-banner">
-            <div className="contact-banner__copy">
-              <span className="section-eyebrow">Get in Touch</span>
-              <h2 id="contact-heading" className="contact-banner__title">
+          <div className="contact-card">
+            <div className="contact-card__copy">
+              <span className="section-eyebrow">03 · Contact</span>
+              <h2 id="contact-heading" className="contact-card__title">
                 Have a project or idea in mind?
               </h2>
-              <p className="contact-banner__text">
-                Always glad to talk about web engineering, practical machine
-                learning tools, or interesting software collaborations.
+              <p className="contact-card__text">
+                Open to interesting software collaborations, web engineering,
+                and practical machine learning work.
               </p>
             </div>
 
-            <div className="contact-banner__actions">
+            <div className="contact-card__actions">
               <a
                 id="contact-email"
                 href={`mailto:${PROFILE.email}`}
                 className="btn btn--primary"
               >
-                Email Me
+                Send an Email
               </a>
               <a
                 id="contact-github"
@@ -334,7 +246,8 @@ export default function HomePage({ recentPosts = [] }) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                GitHub ↗
+                GitHub
+                <span aria-hidden="true">↗</span>
               </a>
             </div>
           </div>
@@ -342,20 +255,4 @@ export default function HomePage({ recentPosts = [] }) {
       </section>
     </>
   )
-}
-
-export async function getStaticProps() {
-  const allPosts = getAllPosts([
-    'slug',
-    'title',
-    'excerpt',
-    'date',
-    'readingTime',
-  ])
-
-  return {
-    props: {
-      recentPosts: allPosts.slice(0, 3),
-    },
-  }
 }

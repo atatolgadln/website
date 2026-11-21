@@ -1,17 +1,8 @@
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import Container from './container'
 import ThemeToggle from './themeToggle'
 
 export default function Header() {
-  const router = useRouter()
-  const path = router.pathname
-  const asPath = router.asPath || ''
-
-  const isPosts = path === '/posts' || path.startsWith('/posts/')
-  const isProjects = path === '/' && asPath.includes('#projects')
-  const isAbout = path === '/' && !isProjects
-
   return (
     <header className="site-header">
       <Container>
@@ -23,29 +14,15 @@ export default function Header() {
 
           <div className="site-header__right">
             <nav className="site-nav" aria-label="Primary">
-              <Link
-                id="nav-about"
-                href="/"
-                className={`site-nav__link${isAbout ? ' site-nav__link--active' : ''}`}
-                aria-current={isAbout ? 'page' : undefined}
-              >
+              <a id="nav-work" href="#work" className="site-nav__link">
+                Work
+              </a>
+              <a id="nav-about" href="#about" className="site-nav__link">
                 About
-              </Link>
-              <Link
-                id="nav-projects"
-                href="/#projects"
-                className={`site-nav__link${isProjects ? ' site-nav__link--active' : ''}`}
-              >
-                Projects
-              </Link>
-              <Link
-                id="nav-posts"
-                href="/posts"
-                className={`site-nav__link${isPosts ? ' site-nav__link--active' : ''}`}
-                aria-current={isPosts ? 'page' : undefined}
-              >
-                Posts
-              </Link>
+              </a>
+              <a id="nav-contact" href="#contact" className="site-nav__link">
+                Contact
+              </a>
             </nav>
 
             <ThemeToggle />
