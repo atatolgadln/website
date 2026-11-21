@@ -1,45 +1,68 @@
 import { useAuth0 } from '@auth0/auth0-react'
 
-function CommentForm({ text, setText, onSubmit }) {
-  const { isAuthenticated, logout, loginWithPopup } = useAuth0()
+export default function CommentForm({
+  text,
+  setText,
+  onSubmit,
+  isSubmitting = false,
+}) {
+  const { isAuthenticated, logout, loginWithPopup, isLoading } = useAuth0()
 
   return (
-    <form onSubmit={onSubmit}>
+    <form className="comment-form" onSubmit={onSubmit}>
+      <label htmlFor="comment-textarea" className="comment-form__label">
+        Leave a note
+      </label>
       <textarea
-        className="flex w-full max-h-40 p-3 rounded resize-y bg-gray-200 text-gray-900 placeholder-gray-500"
-        rows="2"
+        id="comment-textarea"
+        className="comment-form__textarea"
+        rows="3"
         placeholder={
           isAuthenticated
-            ? `What are your thoughts?`
-            : 'Please login to leave a comment'
+            ? 'Share your thoughts on this post…'
+            : 'Sign in to join the conversation'
         }
         onChange={(e) => setText(e.target.value)}
         value={text}
-        disabled={!isAuthenticated}
+        disabled={!isAuthenticated || isSubmitting}
       />
 
-      <div className="flex items-center mt-4">
+      <div className="comment-form__actions">
         {isAuthenticated ? (
-          <div className="flex items-center space-x-6">
-            <button className="py-2 px-4 rounded bg-blue-600 text-white disabled:opacity-40 hover:bg-blue-700">
-              Send
+          <div className="comment-form__buttons">
+            <button
+              id="comment-submit"
+              type="submit"
+              className="btn btn--primary"
+              disabled={isSubmitting || !text.trim()}
+            >
+              {isSubmitting ? 'Posting…' : 'Post Comment'}
             </button>
-            <button className="text-gray-500" onClick={() => logout()}>
+            <button
+              id="comment-logout"
+              type="button"
+              className="btn btn--ghost"
+              onClick={() =>
+                logout({
+                  logoutParams: { returnTo: window.location.origin },
+                })
+              }
+            >
               Log out
             </button>
           </div>
         ) : (
           <button
+            id="comment-login"
             type="button"
-            className="py-2 px-4 rounded bg-blue-600 text-white disabled:opacity-40 hover:bg-blue-700"
+            className="btn btn--primary"
+            disabled={isLoading}
             onClick={() => loginWithPopup()}
           >
-            Log In
+            {isLoading ? 'Checking session…' : 'Log in to comment'}
           </button>
         )}
       </div>
     </form>
   )
 }
-
-export default CommentForm

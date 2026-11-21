@@ -1,5 +1,7 @@
-function Container({ children }) {
-  return <div className="container max-w-2xl m-auto px-4">{children}</div>
-}
+export default function Container({ children, narrow = false, className = '' }) {
+  const classes = ['container', narrow ? 'container--narrow' : '', className]
+    .filter(Boolean)
+    .join(' ')
 
-export default Container
+  return <div className={classes}>{children}</div>
+}

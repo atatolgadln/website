@@ -1,52 +1,83 @@
-import distanceToNow from '../../lib/dateRelative'
-import { useAuth0 } from '@auth0/auth0-react'
+import { distanceToNow } from '../../lib/dateRelative'
 
-function CommentList({ comments, onDelete }) {
-  const { user } = useAuth0()
+export default function CommentList({
+  comments = [],
+  onDelete,
+  currentUser = null,
+  isLoading = false,
+}) {
+  if (isLoading && !comments.length) {
+    return <p className="comment-empty">Loading comments…</p>
+  }
+
+  if (!comments.length) {
+    return (
+      <p className="comment-empty">
+        No comments yet. Be the first to share your thoughts.
+      </p>
+    )
+  }
 
   return (
-    <div className="space-y-6 mt-10">
+    <div className="comment-list" role="list">
       {comments.map((comment) => {
-        const isAuthor = user && user.sub === comment.user.sub
+        const isAuthor =
+          currentUser && comment.user && currentUser.sub === comment.user.sub
         const isAdmin =
-          user && user.email === process.env.NEXT_PUBLIC_AUTH0_ADMIN_EMAIL
+          currentUser &&
+          process.env.NEXT_PUBLIC_AUTH0_ADMIN_EMAIL &&
+          currentUser.email === process.env.NEXT_PUBLIC_AUTH0_ADMIN_EMAIL
+        const canDelete = Boolean(onDelete && (isAdmin || isAuthor))
 
         return (
-          <div key={comment.created_at} className="flex space-x-4">
-            <div className="flex-shrink-0">
+          <article
+            key={comment.id || comment.created_at}
+            className="comment-item"
+            role="listitem"
+          >
+            {comment.user?.picture ? (
               <img
                 src={comment.user.picture}
-                alt={comment.user.name}
-                width={40}
-                height={40}
-                className="rounded-full"
+                alt={comment.user.name || 'Comment author'}
+                width={38}
+                height={38}
+                className="comment-item__avatar"
+                loading="lazy"
               />
-            </div>
+            ) : (
+              <div className="comment-item__avatar" aria-hidden="true" />
+            )}
 
-            <div className="flex-grow">
-              <div className="flex space-x-2">
-                <b>{comment.user.name}</b>
-                <time className="text-gray-400">
-                  {distanceToNow(comment.created_at)}
-                </time>
-                {(isAdmin || isAuthor) && (
-                  <button
-                    className="text-gray-400 hover:text-red-500"
-                    onClick={() => onDelete(comment)}
-                    aria-label="Close"
+            <div className="comment-item__body">
+              <div className="comment-item__header">
+                <span className="comment-item__author">
+                  {comment.user?.name || 'Anonymous'}
+                </span>
+                {comment.created_at ? (
+                  <time
+                    className="comment-item__time"
+                    dateTime={new Date(comment.created_at).toISOString()}
                   >
-                    x
+                    {distanceToNow(comment.created_at)}
+                  </time>
+                ) : null}
+                {canDelete ? (
+                  <button
+                    type="button"
+                    className="comment-item__delete"
+                    onClick={() => onDelete(comment)}
+                    aria-label={`Delete comment by ${comment.user?.name || 'author'}`}
+                  >
+                    Delete
                   </button>
-                )}
+                ) : null}
               </div>
 
-              <div>{comment.text}</div>
+              <p className="comment-item__text">{comment.text}</p>
             </div>
-          </div>
+          </article>
         )
       })}
     </div>
   )
 }
-
-export default CommentList
